@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  [type='text'],
+  [type='email'],
+  [type='url'],
+  [type='password'],
+  [type='number'],
+  [type='date'],
+  [type='datetime-local'],
+  [type='month'],
+  [type='search'],
+  [type='tel'],
+  [type='time'],
+  [type='week'],
+  [multiple],
+  textarea,
+  select {
+    @apply w-full border-gray-300 rounded-lg focus:border-amber-500 focus:ring-amber-500;
+  }
+
+  [type='checkbox'],
+  [type='radio'] {
+    @apply border-gray-300 rounded text-amber-500 focus:ring-amber-500;
+  }
+
+  /*[type='text']:invalid,*/
+  /*[type='email']:invalid,*/
+  /*[type='url']:invalid,*/
+  /*[type='password']:invalid,*/
+  /*[type='number']:invalid,*/
+  /*[type='date']:invalid,*/
+  /*[type='datetime-local']:invalid,*/
+  /*[type='month']:invalid,*/
+  /*[type='search']:invalid,*/
+  /*[type='tel']:invalid,*/
+  /*[type='time']:invalid,*/
+  /*[type='week']:invalid,*/
+  /*[multiple]:invalid,*/
+  /*textarea:invalid,*/
+  /*select:invalid {*/
+  /* @apply w-full border-pink-500
+ focus:border-pink-500 focus:ring-pink-500*/
+  /*}*/
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+
+  .btn {
+    @apply font-bold py-2 px-4 rounded-lg flex justify-center focus:ring-2 focus:ring-offset-1;
+  }
+
+  .btn:disabled {
+    opacity: 40%;
+    cursor: not-allowed;
+  }
+
+  .btn:hover {
+    @apply cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply bg-amber-500 text-white focus:outline-none focus:ring-amber-500 shadow-inset;
+  }
+
+  .btn-primary:hover:not(:disabled),
+  .btn-primary:focus:not(:disabled) {
+    @apply bg-amber-600;
+  }
+
+  .btn-secondary {
+    @apply text-red-600 focus:outline-none focus:ring-red-600;
+  }
+
+  .btn-secondary:hover,
+  .btn-secondary:focus {
+    @apply text-red-600;
+  }
+
+  label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+}
+
+.ng-touched.ng-invalid {
+  @apply border-red-500 focus:border-red-600 focus:ring-red-600;
+}
+
+fieldset[disabled] span[data-test-id='back-button'] {
+  pointer-events: none;
+  opacity: 0.6;
+}
