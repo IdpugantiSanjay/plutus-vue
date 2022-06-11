@@ -24,7 +24,7 @@
   [multiple],
   textarea,
   select {
-    @apply w-full border-gray-300 rounded-sm focus:border-amber-500 focus:ring-amber-500;
+    @apply w-full border-gray-300 text-sm rounded-sm focus:border-amber-500 focus:ring-amber-500 px-[8px] leading-[22px];
   }
 
   [type='checkbox'],
@@ -59,7 +59,7 @@
   }
 
   .btn {
-    @apply font-bold py-2 px-4 rounded-lg flex justify-center focus:ring-2 focus:ring-offset-1;
+    @apply font-bold py-2 px-4 rounded-sm flex justify-center focus:ring-2 focus:ring-offset-1;
   }
 
   .btn:disabled {
@@ -72,7 +72,7 @@
   }
 
   .btn-primary {
-    @apply bg-amber-500 text-white focus:outline-none focus:ring-amber-500 shadow-inset;
+    @apply bg-amber-500 text-white focus:outline-none focus:ring-amber-500;
   }
 
   .btn-primary:hover:not(:disabled),

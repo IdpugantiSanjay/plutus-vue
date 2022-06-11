@@ -15,9 +15,16 @@
       </div>
     </div>
 
-    <the-simple-notification :title="'Transaction Created Successfully'"
-                             :description='"Transaction with amount "'
-                             :show='showSuccessNotification'></the-simple-notification>
+    <teleport to='#modals'>
+      <the-simple-notification :title="'Transaction Created Successfully'"
+                               :description='"Transaction with amount "'
+                               :show='showSuccessNotification'
+                               @onCloseClick='showSuccessNotification = false'
+      >
+
+      </the-simple-notification>
+    </teleport>
+
   </div>
 </template>
 
@@ -45,7 +52,7 @@ export default defineComponent({
         setTimeout(() => {
           this.showSuccessNotification = false
           this.$router.push({ name: 'View Transactions' })
-        }, 1_500)
+        }, 1_000)
       })
     }
   }
