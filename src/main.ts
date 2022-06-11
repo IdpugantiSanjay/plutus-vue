@@ -15,5 +15,4 @@ app.use(router)
 
 app.mount('#app')
 
-
-axios.defaults.baseURL = 'https://localhost:7020/api/'
+axios.defaults.baseURL = import.meta.env.VITE_API_URL
