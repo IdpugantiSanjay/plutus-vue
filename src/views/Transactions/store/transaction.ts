@@ -43,13 +43,17 @@ export const useTransactionStore = defineStore('transaction', {
     },
     getQ(): string {
       return this.q
+    },
+    endpoint() {
+      const auth = useAuthStore()
+      const username = auth.username
+      return `/users/${username}/transactions`
     }
   },
   actions: {
     fetchTransactions() {
-      const auth = useAuthStore()
       this.loading = true
-      return axios.get(`https://localhost:7020/api/users/${auth.username}/transactions`, {
+      return axios.get(this.endpoint, {
         params: { orderBy: 'dateTime desc' }
       }).then((resp: AxiosResponse<{ entities: Transaction[] }>) => {
         this.transactions = resp.data.entities.map(e => ({ ...e, isIncome: isIncome(e) }))
@@ -57,9 +61,8 @@ export const useTransactionStore = defineStore('transaction', {
       })
     },
     createTransaction(transaction: TransactionForm): Promise<void> {
-      const auth = useAuthStore()
       this.loading = true
-      return axios.post(`https://localhost:7020/api/users/${auth.username}/transactions`, {
+      return axios.post(this.endpoint, {
         ...transaction,
         dateTime: new Date(`${transaction.date} ${transaction.time}`).toISOString()
       }).then(() => {
@@ -67,9 +70,8 @@ export const useTransactionStore = defineStore('transaction', {
       })
     },
     deleteTransaction(id: string) {
-      const auth = useAuthStore()
       this.loading = true
-      return axios.delete(`https://localhost:7020/api/users/${auth.username}/transactions/${id}`).then(() => {
+      return axios.delete(this.endpoint).then(() => {
         const index = this.transactions.findIndex(t => t.id === id)
         this.transactions.splice(index, 1)
         this.loading = false
