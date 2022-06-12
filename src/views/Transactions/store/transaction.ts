@@ -26,6 +26,7 @@ export const useTransactionStore = defineStore('transaction', {
             || t.dateTime.includes(this.q)
             || t.category.toLowerCase().includes(this.q.toLowerCase())
             || new Date(t.dateTime).toLocaleString('default', { month: 'long' }).toLowerCase().includes(this.q.toLowerCase())
+            || t.mutualFund?.name.toLowerCase().includes(this.q.toLowerCase())
         })
       }
 
@@ -71,7 +72,7 @@ export const useTransactionStore = defineStore('transaction', {
     },
     deleteTransaction(id: string) {
       this.loading = true
-      return axios.delete(this.endpoint).then(() => {
+      return axios.delete(`${this.endpoint}/${id}`).then(() => {
         const index = this.transactions.findIndex(t => t.id === id)
         this.transactions.splice(index, 1)
         this.loading = false

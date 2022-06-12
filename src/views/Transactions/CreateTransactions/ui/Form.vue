@@ -5,7 +5,7 @@
         <label for='amount'>
           Amount
           <div class='mt-1'>
-            <input id='amount' type='number' required min='1' v-model='form.amount' autofocus />
+            <input id='amount' type='number' required min='1' step=".1" v-model='form.amount' autofocus />
           </div>
         </label>
       </div>
@@ -24,6 +24,92 @@
             </select>
           </label>
         </div>
+      </div>
+
+      <div v-if='form.category === "Mutual Fund"' class='space-y-6' >
+        <div>
+          <Combobox v-model='fundName'>
+            <ComboboxLabel>Fund Name:</ComboboxLabel>
+
+            <div class='relative mt-1'>
+              <div
+                class='relative w-full  cursor-default overflow-hidden rounded-sm bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-300 sm:text-sm'
+              >
+
+                <ComboboxInput
+                  class='w-full border-gray-300 py-2 pl-3 pr-10 text-sm leading-[22px]'
+                  :displayValue='(fund) => fund'
+                  @change='query = $event.target.value'
+                />
+
+                <ComboboxButton
+                  class='absolute inset-y-0 right-0 flex items-center pr-2'
+                >
+                  <SelectorIcon class='h-5 w-5 text-gray-400' aria-hidden='true' />
+                </ComboboxButton>
+
+              </div>
+              <TransitionRoot
+                leave='transition ease-in duration-100'
+                leaveFrom='opacity-100'
+                leaveTo='opacity-0'
+                @after-leave="query = ''"
+              >
+                <ComboboxOptions
+                  class='absolute mt-1 max-h-60 w-full overflow-auto rounded-sm bg-white py-1 ring-1 ring-black ring-opacity-5 focus:outline-none text-sm'
+                >
+                  <div
+                    v-if="filteredFunds.length === 0 && query !== ''"
+                    class='relative cursor-default select-none py-2 px-4 text-gray-700 shadow'
+                  >
+                    Nothing found.
+                  </div>
+
+                  <ComboboxOption
+                    v-for='fund in filteredFunds'
+                    as='template'
+                    :key='fund'
+                    :value='fund'
+                    v-slot='{ selected, active }'
+                  >
+                    <li
+                      class='relative cursor-default select-none py-2 pl-10 pr-4'
+                      :class="{
+                  'bg-amber-600 text-white': active,
+                  'text-gray-900': !active,
+                }"
+                    >
+                <span
+                  class='block truncate'
+                  :class="{ 'font-medium': selected, 'font-normal': !selected }"
+                >
+                  {{ fund }}
+                </span>
+                      <span
+                        v-if='selected'
+                        class='absolute inset-y-0 left-0 flex items-center pl-3'
+                        :class="{ 'text-white': active, 'text-amber-600': !active }"
+                      >
+                  <CheckIcon class='h-5 w-5' aria-hidden='true' />
+                </span>
+                    </li>
+                  </ComboboxOption>
+                </ComboboxOptions>
+              </TransitionRoot>
+            </div>
+          </Combobox>
+        </div>
+
+
+        <div>
+          <label for='units'>
+            Units
+            <div class='mt-1'>
+              <input id='units' type='number' required min='1' v-model='units' step=".01" />
+            </div>
+          </label>
+        </div>
+
       </div>
 
       <div>
@@ -99,6 +185,7 @@
 
       </div>
 
+
       <div class='mt-4 flex justify-center gap-2'>
         <button class='w-full btn btn-secondary' type='button' @click='resetForm'>Clear</button>
         <button class='btn btn-primary w-full transition-colors'>
@@ -114,21 +201,67 @@
 import { useCategoryStore } from '@/stores/category'
 import type { TransactionForm } from '@/views/Transactions/CreateTransactions/types/TransactionForm'
 import { getRoundedMinutes } from '@/utils/roundedMinutes'
-import { defineComponent } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import type { Dishes } from '@/views/Transactions/CreateTransactions/types/Transaction'
 import Rating from '@/components/TheRating.vue'
 import DishesList from '@/views/Transactions/CreateTransactions/ui/DishesList.vue'
 import { idGen } from '@/utils/nextId'
 
+import { CheckIcon, SelectorIcon } from '@heroicons/vue/outline'
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxLabel,
+  ComboboxOption,
+  ComboboxOptions,
+  TransitionRoot
+} from '@headlessui/vue'
+
 export default defineComponent({
   name: 'CreateTransactionForm',
-  components: { DishesList, Rating },
+  components: {
+    DishesList,
+    Rating,
+    Combobox,
+    ComboboxInput,
+    ComboboxOptions,
+    ComboboxOption,
+    SelectorIcon,
+    CheckIcon,
+    TransitionRoot,
+    ComboboxButton,
+    ComboboxLabel
+  },
   emits: ['formSubmit'],
-  setup() {
+  setup: function() {
     const categoryStore = useCategoryStore()
+
+    const funds = [
+      'UTI Nifty Index Fund',
+      'UTI Nifty Next 50 Index Fund',
+      'Nippon India Tax Saver (ELSS) Fund',
+      'Aditya Birla Sun Life Tax Relief 96',
+      'Tata India Tax Savings Fund',
+    ]
+    const selectedPerson = ref(funds[0])
+    const query = ref('')
+
+    const filteredFunds = computed(() => {
+      return query.value === ''
+        ? funds
+        : funds.filter((fund) => {
+          return fund.toLowerCase().includes(query.value.toLowerCase())
+        })
+    })
+
     return {
       categories: categoryStore.categories,
-      subCategories: categoryStore.subCategories
+      subCategories: categoryStore.subCategories,
+      filteredFunds,
+      query,
+      selectedPerson,
+      funds: funds
     }
   },
   data(): { form: TransactionForm } {
@@ -170,7 +303,7 @@ export default defineComponent({
     },
     removeDish(index: number) {
       if (!this.form.foodOrder) return
-      this.form.foodOrder.dishes.splice(index, 1);
+      this.form.foodOrder.dishes.splice(index, 1)
     },
     resetForm() {
       this.form = {
@@ -206,6 +339,24 @@ export default defineComponent({
         return this.form.foodOrder.dishes || []
       },
       set(_: Dishes[number]) {
+      }
+    },
+    units: {
+      get() {
+        return this.form?.mutualFund?.units ?? 0
+      },
+      set(value: number) {
+        if (!this.form.mutualFund) this.form.mutualFund = { name: '', units: 0 }
+        this.form.mutualFund.units = value
+      }
+    },
+    fundName: {
+      get() {
+        return this.form?.mutualFund?.name ?? ''
+      },
+      set(value: string) {
+        if (!this.form.mutualFund) this.form.mutualFund = { name: '', units: 0 }
+        this.form.mutualFund.name = value
       }
     }
   }

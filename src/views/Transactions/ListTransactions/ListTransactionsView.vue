@@ -63,7 +63,7 @@
         <div class='w-full shadow-sm  bg-white mt-2 p-2 px-4'>
           <div v-for='(trx, index) of trxs' :key='trx.id'>
             <on-click-outside class='relative' :data-id.attr='trx.id' @trigger='() => resetLongPress(trx.id)'
-                              v-v-on-long-press='[() => onLongPress(trx.id), { delay: 200 }]'>
+                              v-v-on-long-press='[() => onLongPress(trx.id), { delay: 600 }]'>
               <div class='deleteButton text-pink-500 border-2 p-1 bg-gray-200'
                    @click='() => deleteTransaction(trx.id)'>
                 <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24'
@@ -87,7 +87,7 @@
                 </div>
                 <div class='flex flex-col flex-1 min-w-0'>
                   <div class='truncate'>
-                    {{ trx.category === 'Salary' ? 'SALARY FOR THE MONTH OF ' + month(trx.dateTime) :  trx.foodOrder?.restaurant || trx.description
+                    {{ trx.category === 'Salary' ? 'SALARY FOR THE MONTH OF ' + month(trx.dateTime) : trx.category === 'Mutual Fund' ? trx.mutualFund.name +  ' [' + trx.mutualFund.units + ' Units]' :  trx.foodOrder?.restaurant ||  trx.description
                     }}
                   </div>
                   <div class='text-xs opacity-60'>
@@ -135,7 +135,6 @@ export default defineComponent({
 
     const resetLongPress = (id: string) => {
       if (!(id in timeLines)) return
-      console.log(id)
 
       if (Object.values(timeLines).length) {
         for (const [prevId, tl] of Object.entries(timeLines)) {

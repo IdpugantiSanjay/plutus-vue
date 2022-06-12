@@ -5,12 +5,18 @@ export type Transaction = {
   description: string
   id: string
   username: string
-  foodOrder?: FoodOrder
+  foodOrder?: FoodOrder,
+  mutualFund?: MutualFund
 }
 
 export type FoodOrder = {
   dishes: Dishes
   restaurant: string
+}
+
+export type MutualFund = {
+  name: string,
+  units: number
 }
 
 

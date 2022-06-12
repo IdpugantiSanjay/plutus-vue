@@ -24,7 +24,7 @@
   [multiple],
   textarea,
   select {
-    @apply w-full border-gray-300 text-sm rounded-sm focus:border-amber-500 focus:ring-amber-500 px-[8px] leading-[22px];
+    @apply w-full border-gray-300 text-sm rounded-sm focus:border-amber-500 focus:ring-amber-500 px-[8px] leading-[22px] border-[1.5px]
   }
 
   [type='checkbox'],
