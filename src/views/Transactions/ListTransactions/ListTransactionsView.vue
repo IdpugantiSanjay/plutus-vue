@@ -37,12 +37,13 @@
       </div>
     </div>
 
-    <div class='mt-4 w-3/4 m-auto' v-show='showSearch'>
-      <div class='relative'>
+    <div class='mt-4 w-3/4 m-auto flex' v-show='showSearch'>
+      <div class='relative flex-1'>
         <input v-model='q' id='q' name='q' type='text' required=''
-               class='appearance-none block w-full px-2 pl-10 py-2 border border-gray-300 shadow-sm placeholder-gray-400 sm:text-sm'
-               ref='searchBox' />
-        <svg @click='$refs.searchBox.focus()' class='h-6 w-6 absolute left-2 top-1.5 opacity-40' xmlns='http://www.w3.org/2000/svg' fill='none'
+               class='appearance-none block w-full pl-10 shadow-sm placeholder-gray-400 text-sm'
+               ref='searchBox' placeholder='Search...' />
+        <svg @click='$refs.searchBox.focus()' class='h-6 w-6 absolute left-2 top-1.5 opacity-40'
+             xmlns='http://www.w3.org/2000/svg' fill='none'
              viewBox='0 0 24 24'>
           <g transform='matrix(0.5,0,0,0.5,0,0)'>
             <path fill='#f59e0b' fill-rule='evenodd'
@@ -86,8 +87,22 @@
                   </div>
                 </div>
                 <div class='flex flex-col flex-1 min-w-0'>
-                  <div class='truncate'>
-                    {{ trx.category === 'Salary' ? 'SALARY FOR THE MONTH OF ' + month(trx.dateTime) : trx.category === 'Mutual Fund' ? trx.mutualFund.name +  ' [' + trx.mutualFund.units + ' Units]' :  trx.foodOrder?.restaurant ||  trx.description
+
+                  <div v-if='trx.category === "Food Delivery"' class='flex truncate items-center gap-2' >
+                    <span> {{ trx.foodOrder.restaurant }} </span>
+                    <span>
+                      <rating :model-value='trx.foodOrder.dishes[0].rating' :star-size='20' :read-only='true'></rating>
+                    </span>
+                  </div>
+
+                  <div class='truncate' v-else>
+                    {{ trx.category === 'Salary'
+                    ? 'SALARY FOR THE MONTH OF ' + month(trx.dateTime)
+                    : trx.category === 'Mutual Fund'
+                      ? trx.mutualFund.name + ' [' + trx.mutualFund.units + ' Units]'
+                      : trx.category === 'Food Delivery'
+                        ? trx.foodOrder.restaurant
+                        : trx.description
                     }}
                   </div>
                   <div class='text-xs opacity-60'>
@@ -119,10 +134,11 @@ import { isIncome } from '@/utils/isIncome'
 import { PlusIcon } from '@heroicons/vue/solid'
 import router from '@/router'
 import { mapState } from 'pinia'
+import Rating from '@/components/TheRating.vue'
 
 export default defineComponent({
   name: 'ListTransactionsView',
-  components: { TheNoTransactions, PlusIcon, OnClickOutside },
+  components: { Rating, TheNoTransactions, PlusIcon, OnClickOutside },
   directives: { vOnLongPress },
   setup() {
     const store = useTransactionStore()
