@@ -37,24 +37,27 @@
       </div>
     </div>
 
-    <div class='mt-4 w-3/4 m-auto flex' v-show='showSearch'>
-      <div class='relative flex-1'>
-        <input v-model='q' id='q' name='q' type='text' required=''
-               class='appearance-none block w-full pl-10 shadow-sm placeholder-gray-400 text-sm'
-               ref='searchBox' placeholder='Search...' />
-        <svg @click='$refs.searchBox.focus()' class='h-6 w-6 absolute left-2 top-1.5 opacity-40'
-             xmlns='http://www.w3.org/2000/svg' fill='none'
-             viewBox='0 0 24 24'>
-          <g transform='matrix(0.5,0,0,0.5,0,0)'>
-            <path fill='#f59e0b' fill-rule='evenodd'
-                  d='M37.388 31.3437C39.0454 28.62 40 25.4215 40 22C40 12.0589 31.9411 4 22 4C12.0589 4 4 12.0589 4 22C4 31.9411 12.0589 40 22 40C25.4215 40 28.62 39.0454 31.3437 37.388C31.5081 37.586 31.6719 37.7837 31.8355 37.981C33.5263 40.0209 35.1874 42.0249 37.0998 43.9982C38.2598 45.1951 39.9911 45.3681 41.23 44.2531C41.6689 43.8581 42.1824 43.3728 42.7776 42.7776C43.3728 42.1824 43.8581 41.6689 44.2531 41.23C45.3681 39.9911 45.1951 38.2598 43.9982 37.0998C42.0249 35.1874 40.0209 33.5263 37.981 31.8355C37.7837 31.6719 37.586 31.5081 37.388 31.3437Z'
-                  clip-rule='evenodd'></path>
-            <circle cx='22' cy='22' r='12' fill='#fde68a'></circle>
-          </g>
-        </svg>
-
+    <Transition name='fade'>
+      <div class='mt-4 w-3/4 m-auto flex' v-show='showSearch'>
+        <div class='relative flex-1'>
+          <input v-model='q' id='q' name='q' type='text' required=''
+                 class='appearance-none block w-full pl-10 shadow-sm placeholder-gray-400 text-sm'
+                 ref='searchBox' placeholder='Search...' />
+          <svg @click='$refs.searchBox.focus()' class='h-6 w-6 absolute left-2 top-1.5 opacity-40'
+               xmlns='http://www.w3.org/2000/svg' fill='none'
+               viewBox='0 0 24 24'>
+            <g transform='matrix(0.5,0,0,0.5,0,0)'>
+              <path fill='#f59e0b' fill-rule='evenodd'
+                    d='M37.388 31.3437C39.0454 28.62 40 25.4215 40 22C40 12.0589 31.9411 4 22 4C12.0589 4 4 12.0589 4 22C4 31.9411 12.0589 40 22 40C25.4215 40 28.62 39.0454 31.3437 37.388C31.5081 37.586 31.6719 37.7837 31.8355 37.981C33.5263 40.0209 35.1874 42.0249 37.0998 43.9982C38.2598 45.1951 39.9911 45.3681 41.23 44.2531C41.6689 43.8581 42.1824 43.3728 42.7776 42.7776C43.3728 42.1824 43.8581 41.6689 44.2531 41.23C45.3681 39.9911 45.1951 38.2598 43.9982 37.0998C42.0249 35.1874 40.0209 33.5263 37.981 31.8355C37.7837 31.6719 37.586 31.5081 37.388 31.3437Z'
+                    clip-rule='evenodd'></path>
+              <circle cx='22' cy='22' r='12' fill='#fde68a'></circle>
+            </g>
+          </svg>
+        </div>
       </div>
-    </div>
+    </Transition>
+
+
     <div v-if='!loading() && store.noTransactions' class='w-full h-full flex items-center justify-center'>
       <the-no-transactions class='shadow bg-white p-12 rounded-xl'></the-no-transactions>
     </div>
@@ -88,10 +91,10 @@
                 </div>
                 <div class='flex flex-col flex-1 min-w-0'>
 
-                  <div v-if='trx.category === "Food Delivery"' class='flex truncate items-center gap-2' >
+                  <div v-if='trx.category === "Food Delivery"' class='flex truncate items-center gap-2'>
                     <span> {{ trx.foodOrder.restaurant }} </span>
                     <span>
-                      <rating :model-value='trx.foodOrder.dishes[0].rating' :star-size='20' :read-only='true'></rating>
+                      <rating :model-value='avgRating(trx.foodOrder.dishes)' :star-size='20' :read-only='true'></rating>
                     </span>
                   </div>
 
@@ -129,7 +132,7 @@ import { vOnLongPress, OnClickOutside } from '@vueuse/components'
 import { gsap } from 'gsap'
 import TheNoTransactions from '@/views/Transactions/ListTransactions/TheNoTransactions.vue'
 import { isIncome } from '@/utils/isIncome'
-
+import type { Dishes } from '@/views/Transactions/CreateTransactions/types/Transaction'
 
 import { PlusIcon } from '@heroicons/vue/solid'
 import router from '@/router'
@@ -188,11 +191,14 @@ export default defineComponent({
   data() {
     return {
       q: '',
-      showSearch: false
+      showSearch: true
     }
   },
   methods: {
     ...mapState(useTransactionStore, ['loading']),
+    avgRating(dishes: Dishes) {
+      return Math.floor(dishes.reduce((acc, d) => acc + d.rating, 0) / dishes.length)
+    },
     toggleSearchBox() {
       this.showSearch = !this.showSearch
       if (!this.showSearch) this.q = ''
@@ -275,12 +281,13 @@ export default defineComponent({
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity .5s
+  transition: all 0.4s ease;
 }
 
-.fade-enter,
+.fade-enter-from,
 .fade-leave-to {
-  opacity: 0
+  opacity: 0;
+  transform: scale(0.7);
 }
 
 </style>
