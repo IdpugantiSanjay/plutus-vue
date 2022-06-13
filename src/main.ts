@@ -8,11 +8,11 @@ import './index.css'
 import axios from 'axios'
 
 
-const app = createApp(App)
+  const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
+  app.use(createPinia())
+  app.use(router)
 
-app.mount('#app')
+  app.mount('#app')
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL

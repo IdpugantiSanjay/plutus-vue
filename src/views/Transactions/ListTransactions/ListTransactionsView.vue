@@ -13,18 +13,7 @@
       <div>
         <span class='text-xl'> Transactions </span>
       </div>
-      <div class='flex gap-4'>
-        <div>
-          <svg class='h-9 w-9 hover:opacity-60 cursor-pointer' xmlns='http://www.w3.org/2000/svg' fill='none'
-               viewBox='0 0 24 24' @click='toggleSearchBox'>
-            <g transform='matrix(0.5,0,0,0.5,0,0)'>
-              <path fill='#f59e0b' fill-rule='evenodd'
-                    d='M37.388 31.3437C39.0454 28.62 40 25.4215 40 22C40 12.0589 31.9411 4 22 4C12.0589 4 4 12.0589 4 22C4 31.9411 12.0589 40 22 40C25.4215 40 28.62 39.0454 31.3437 37.388C31.5081 37.586 31.6719 37.7837 31.8355 37.981C33.5263 40.0209 35.1874 42.0249 37.0998 43.9982C38.2598 45.1951 39.9911 45.3681 41.23 44.2531C41.6689 43.8581 42.1824 43.3728 42.7776 42.7776C43.3728 42.1824 43.8581 41.6689 44.2531 41.23C45.3681 39.9911 45.1951 38.2598 43.9982 37.0998C42.0249 35.1874 40.0209 33.5263 37.981 31.8355C37.7837 31.6719 37.586 31.5081 37.388 31.3437Z'
-                    clip-rule='evenodd'></path>
-              <circle cx='22' cy='22' r='12' fill='#fde68a'></circle>
-            </g>
-          </svg>
-        </div>
+      <div class='flex'>
         <div>
           <span class='text-amber-500 cursor-pointer' @click='navigateToNewTransactionPage'>
         <svg class='h-9 w-9 hover:opacity-60' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
@@ -32,8 +21,6 @@
                                                                                                     d='M22.638 34.9111C21.696 34.7777 21.1509 33.9427 21.1168 32.9919C21.0756 31.8464 21.0288 29.9516 21.0093 26.9907C18.0484 26.9712 16.1536 26.9244 15.0081 26.8832C14.0573 26.8491 13.2223 26.304 13.0889 25.362C13.0361 24.989 13 24.5375 13 24C13 23.4625 13.0361 23.011 13.0889 22.638C13.2223 21.696 14.0573 21.1509 15.0081 21.1168C16.1536 21.0756 18.0484 21.0288 21.0093 21.0093C21.0288 18.0484 21.0756 16.1536 21.1168 15.0081C21.1509 14.0573 21.696 13.2223 22.638 13.0889C23.011 13.0361 23.4625 13 24 13C24.5375 13 24.989 13.0361 25.362 13.0889C26.304 13.2223 26.8491 14.0573 26.8832 15.0081C26.9244 16.1536 26.9712 18.0484 26.9907 21.0093C29.9516 21.0288 31.8464 21.0756 32.9919 21.1168C33.9427 21.1509 34.7777 21.696 34.9111 22.638C34.9639 23.011 35 23.4625 35 24C35 24.5375 34.9639 24.989 34.9111 25.362C34.7777 26.304 33.9427 26.8491 32.9919 26.8832C31.8464 26.9244 29.9516 26.9712 26.9907 26.9907C26.9712 29.9516 26.9244 31.8464 26.8832 32.9919C26.8491 33.9427 26.304 34.7777 25.362 34.9111C24.989 34.9639 24.5375 35 24 35C23.4625 35 23.011 34.9639 22.638 34.9111Z'></path></g></svg>
       </span>
         </div>
-
-
       </div>
     </div>
 
@@ -122,7 +109,13 @@
         </div>
       </div>
     </div>
+
+    <teleport to='#modals'>
+      <the-action-notification @onActionClick='undoDelete' v-bind='notification' @onCloseClick='notification.show = false'></the-action-notification>
+    </teleport>
   </div>
+
+
 </template>
 
 <script lang='ts'>
@@ -138,16 +131,17 @@ import { PlusIcon } from '@heroicons/vue/solid'
 import router from '@/router'
 import { mapState } from 'pinia'
 import Rating from '@/components/TheRating.vue'
+import TheSimpleNotification from '@/components/TheSimpleNotification.vue'
+import TheActionNotification from '@/components/TheActionNotification.vue'
 
 export default defineComponent({
   name: 'ListTransactionsView',
-  components: { Rating, TheNoTransactions, PlusIcon, OnClickOutside },
+  components: { TheActionNotification, Rating, TheNoTransactions, PlusIcon, OnClickOutside, TheSimpleNotification },
   directives: { vOnLongPress },
   setup() {
     const store = useTransactionStore()
-    const loading = ref(true)
     onMounted(() => {
-      store.fetchTransactions().then(() => loading.value = false)
+      store.fetchTransactions()
     })
 
     const timeLines: Record<string, gsap.core.Timeline> = {}
@@ -185,8 +179,29 @@ export default defineComponent({
       })
     }
 
+    const notification = ref({ title: '', show: false, description: '' });
+    let stopDelete = false
 
-    return { store, isIncome, onLongPress, resetLongPress }
+    const deleteWithDelay = (id: string) => {
+      store.removeFromStore(id)
+      stopDelete = false
+
+      notification.value.show = true
+      notification.value.title = 'Transaction Deleted'
+      setTimeout(() => {
+        notification.value.show = false
+        if (!stopDelete) {
+          store.deleteTransaction(id)
+        }
+      }, 2_000)
+    }
+
+    const undoDelete = () => {
+      stopDelete = true
+      notification.value.show = false
+    }
+
+    return { store, isIncome, onLongPress, resetLongPress, notification, deleteWithDelay, undoDelete }
   },
   data() {
     return {
@@ -231,7 +246,7 @@ export default defineComponent({
       tl.to(`[data-id="${id}"] > .deleteButton`, { scale: '0', duration: 0.2 })
         .to(`[data-id="${id}"]`, { translateX: '100%', scale: 0, duration: 0.5 })
         .then(() => {
-          this.store.deleteTransaction(id)
+          this.deleteWithDelay(id)
         })
     },
     back() {
@@ -243,7 +258,7 @@ export default defineComponent({
     },
     navigateToNewTransactionPage() {
       router.push({ name: 'Create Transaction' })
-    }
+    },
   },
   watch: {
     q(value) {

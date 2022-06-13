@@ -73,11 +73,15 @@ export const useTransactionStore = defineStore('transaction', {
     deleteTransaction(id: string) {
       this.loading = true
       return axios.delete(`${this.endpoint}/${id}`).then(() => {
-        const index = this.transactions.findIndex(t => t.id === id)
-        this.transactions.splice(index, 1)
+        // this.removeFromStore(id)
         this.loading = false
       })
     },
+    removeFromStore(id: string) {
+      const index = this.transactions.findIndex(t => t.id === id)
+      this.transactions.splice(index, 1)
+    },
+
     setQ(value: string) {
       this.q = value
     }

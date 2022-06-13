@@ -1,3 +1,4 @@
+<!-- This example requires Tailwind CSS v2.0+ -->
 <template>
     <transition enter-active-class='transform ease-out duration-300 transition'
                 enter-from-class='translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2'
@@ -7,13 +8,13 @@
       <div v-if='show'
            class='max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden'>
         <div class='p-4'>
-          <div class='flex items-start'>
-            <div class='flex-shrink-0'>
-              <CheckCircleIcon class='h-6 w-6 text-green-400' aria-hidden='true' />
-            </div>
-            <div class='ml-3 w-0 flex-1 pt-0.5'>
-              <p class='text-sm font-medium text-gray-900'>{{ title }}</p>
-              <p class='mt-1 text-sm text-gray-500'>{{ description }}</p>
+          <div class='flex items-center'>
+            <div class='w-0 flex-1 flex justify-between'>
+              <p class='w-0 flex-1 text-sm font-medium text-gray-900'>Discussion archived</p>
+              <button type='button' @click='$emit("onActionClick")'
+                      class='ml-3 flex-shrink-0 bg-white rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'>
+                Undo
+              </button>
             </div>
             <div class='ml-4 flex-shrink-0 flex'>
               <button @click='$emit("onCloseClick")'
@@ -29,20 +30,13 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import { CheckCircleIcon } from '@heroicons/vue/outline'
 import { XIcon } from '@heroicons/vue/solid'
 
-export default defineComponent({
+export default {
   components: {
-    CheckCircleIcon,
     XIcon
   },
-  props: ['title', 'description', 'show'],
-  emits: ['onCloseClick']
-})
+  props: ['show'],
+  emits: ['onActionClick', 'onCloseClick'],
+}
 </script>
-
-<style scoped>
-
-</style>

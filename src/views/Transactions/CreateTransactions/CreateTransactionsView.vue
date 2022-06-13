@@ -15,15 +15,7 @@
       </div>
     </div>
 
-    <teleport to='#modals'>
-      <the-simple-notification :title="'Transaction Created Successfully'"
-                               :description='"Transaction with amount "'
-                               :show='showSuccessNotification'
-                               @onCloseClick='showSuccessNotification = false'
-      >
 
-      </the-simple-notification>
-    </teleport>
 
   </div>
 </template>
@@ -35,6 +27,7 @@ import CreateTransactionForm from '@/views/Transactions/CreateTransactions/ui/Fo
 import { useTransactionStore } from '@/views/Transactions/store/transaction'
 import type { TransactionForm } from '@/views/Transactions/CreateTransactions/types/TransactionForm'
 import { mapActions } from 'pinia'
+import { useEventBus } from '@vueuse/core'
 
 export default defineComponent({
   name: 'CreateTransactionsView',
@@ -48,11 +41,9 @@ export default defineComponent({
     ...mapActions(useTransactionStore, ['createTransaction']),
     onFormSubmit(form: TransactionForm) {
       this.createTransaction(form).then(() => {
-        this.showSuccessNotification = true
-        setTimeout(() => {
-          this.showSuccessNotification = false
-          this.$router.push({ name: 'View Transactions' })
-        }, 1_000)
+        const bus = useEventBus<{ title: string, description: string }>('SIMPLE_NOTIFICATION')
+        this.$router.push({ name: 'View Transactions' })
+        bus.emit({ title: 'Transaction Created Successfully', description: `Transaction with amount: ${form.amount} created` })
       })
     }
   }
