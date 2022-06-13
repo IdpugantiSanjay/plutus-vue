@@ -243,6 +243,8 @@ export default defineComponent({
       'Nippon India Tax Saver (ELSS) Fund',
       'Aditya Birla Sun Life Tax Relief 96',
       'Tata India Tax Savings Fund',
+      'Axis Midcap Fund',
+      'Mirae Asset Healthcare Fund',
     ]
     const selectedPerson = ref(funds[0])
     const query = ref('')
