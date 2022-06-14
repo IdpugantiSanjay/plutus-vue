@@ -6,8 +6,19 @@ import type { AxiosResponse } from 'axios'
 import { useAuthStore } from '@/views/Auth/Login/store/auth'
 import { isIncome } from '@/utils/isIncome'
 
+
+type ListTransactionVm =
+  Omit<Transaction, 'foodOrder' | 'mutualFund'>
+  & { 'foodOrder': ListTransactionFoodOrderVm }
+  & { 'mutualFund': ListTransactionMutualFundVm }
+  & { isIncome: boolean, monthYear: string, month: string, date: number, searchTags: Array<string>, title: string }
+
+
+type ListTransactionFoodOrderVm = Transaction['foodOrder'] & { rating: number }
+type ListTransactionMutualFundVm = Transaction['mutualFund'] & { unitPrice: number }
+
 type TransactionStoreState = {
-  transactions: Transaction[],
+  transactions: ListTransactionVm[],
   q: string
   loading: boolean
 }
@@ -19,21 +30,13 @@ export const useTransactionStore = defineStore('transaction', {
       let transactions = this.transactions
 
       if (this.q) {
-        transactions = transactions.filter(t => {
-          return t.foodOrder?.restaurant.toLowerCase().includes(this.q.toLowerCase())
-            || t.description?.toLowerCase().includes(this.q.toLowerCase())
-            || t.amount.toString().includes(this.q)
-            || t.dateTime.includes(this.q)
-            || t.category.toLowerCase().includes(this.q.toLowerCase())
-            || new Date(t.dateTime).toLocaleString('default', { month: 'long' }).toLowerCase().includes(this.q.toLowerCase())
-            || t.mutualFund?.name.toLowerCase().includes(this.q.toLowerCase())
-        })
+        transactions = transactions.filter(t => t.searchTags.some(s => s.toLowerCase().includes(this.q.toLowerCase())))
       }
 
-      const groups: Record<string, Transaction[]> = {}
+      const groups: Record<string, ListTransactionVm[]> = {}
       for (const transaction of transactions) {
         const transactionDate = new Date(transaction.dateTime)
-        const monthYear = transactionDate.getMonth() + 1 + ' ' + transactionDate.getFullYear()
+        const monthYear = transaction.month + ' ' + transactionDate.getFullYear()
         if (monthYear in groups) groups[monthYear].push(transaction)
         else groups[monthYear] = [transaction]
       }
@@ -56,7 +59,7 @@ export const useTransactionStore = defineStore('transaction', {
       this.loading = true
       return axios.get(this.endpoint, {
         params: { orderBy: 'dateTime desc' }
-      }).then((resp: AxiosResponse<{ entities: Transaction[] }>) => {
+      }).then((resp: AxiosResponse<{ entities: ListTransactionVm[] }>) => {
         this.transactions = resp.data.entities.map(e => ({ ...e, isIncome: isIncome(e) }))
         this.loading = false
       })
@@ -73,7 +76,6 @@ export const useTransactionStore = defineStore('transaction', {
     deleteTransaction(id: string) {
       this.loading = true
       return axios.delete(`${this.endpoint}/${id}`).then(() => {
-        // this.removeFromStore(id)
         this.loading = false
       })
     },

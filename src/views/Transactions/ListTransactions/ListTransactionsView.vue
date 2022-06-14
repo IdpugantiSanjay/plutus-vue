@@ -50,7 +50,7 @@
     </div>
     <div class='overflow-hidden' v-else>
       <div v-for='(trxs, group) of transactions()'>
-        <div class='flex justify-center mt-8'><span class='text-sm opacity-60 '> {{ monthYear(group) }} </span></div>
+        <div class='flex justify-center mt-8'><span class='text-sm opacity-60 '> {{ group }} </span></div>
         <div class='w-full shadow-sm  bg-white mt-2 p-2 px-4'>
           <div v-for='(trx, index) of trxs' :key='trx.id'>
             <on-click-outside class='relative' :data-id.attr='trx.id' @trigger='() => resetLongPress(trx.id)'
@@ -70,37 +70,25 @@
               >
                 <div class='flex flex-col basis-8 items-center'>
                   <div class='text-xs opacity-60'>
-                    {{ month(trx.dateTime) }}
+                    {{ trx.month }}
                   </div>
                   <div class='opacity-60'>
-                    {{ day(trx.dateTime) }}
+                    {{ trx.date }}
                   </div>
                 </div>
                 <div class='flex flex-col flex-1 min-w-0'>
-
-                  <div v-if='trx.category === "Food Delivery"' class='flex truncate items-center gap-2'>
-                    <span> {{ trx.foodOrder.restaurant }} </span>
-                    <span>
-                      <rating :model-value='avgRating(trx.foodOrder.dishes)' :star-size='20' :read-only='true'></rating>
+                  <div class='truncate' :class='{ "flex truncate items-center gap-2": trx.category }'>
+                    <span>{{ trx.title }}</span>
+                    <span v-if='trx.category === "Food Delivery"'>
+                      <rating :model-value='trx.foodOrder.rating' :star-size='20' :read-only='true'></rating>
                     </span>
-                  </div>
-
-                  <div class='truncate' v-else>
-                    {{ trx.category === 'Salary'
-                    ? 'SALARY FOR THE MONTH OF ' + month(trx.dateTime)
-                    : trx.category === 'Mutual Fund'
-                      ? trx.mutualFund.name + ' [' + trx.mutualFund.units + ' Units]'
-                      : trx.category === 'Food Delivery'
-                        ? trx.foodOrder.restaurant
-                        : trx.description
-                    }}
                   </div>
                   <div class='text-xs opacity-60'>
                     {{ trx.category }}
                   </div>
                 </div>
                 <div class='text-xl shrink-0' :class=" { 'text-emerald-700': isIncome(trx) } ">
-                  {{ isIncome(trx) ? '' : '-' }}₹{{ trx.amount }}
+                  {{ trx.amount }}
                 </div>
               </div>
             </on-click-outside>
@@ -111,7 +99,8 @@
     </div>
 
     <teleport to='#modals'>
-      <the-action-notification @onActionClick='undoDelete' v-bind='notification' @onCloseClick='notification.show = false'></the-action-notification>
+      <the-action-notification @onActionClick='undoDelete' v-bind='notification'
+                               @onCloseClick='notification.show = false'></the-action-notification>
     </teleport>
   </div>
 
@@ -119,13 +108,12 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, onMounted, onUnmounted, ref } from 'vue'
 import { useTransactionStore } from '@/views/Transactions/store/transaction'
 import { vOnLongPress, OnClickOutside } from '@vueuse/components'
 import { gsap } from 'gsap'
 import TheNoTransactions from '@/views/Transactions/ListTransactions/TheNoTransactions.vue'
 import { isIncome } from '@/utils/isIncome'
-import type { Dishes } from '@/views/Transactions/CreateTransactions/types/Transaction'
 
 import { PlusIcon } from '@heroicons/vue/solid'
 import router from '@/router'
@@ -140,9 +128,21 @@ export default defineComponent({
   directives: { vOnLongPress },
   setup() {
     const store = useTransactionStore()
+
+    const searchBox = ref<HTMLInputElement | null>(null);
+
     onMounted(() => {
       store.fetchTransactions()
+
+      document.onkeydown = (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.key === 'f') {
+          searchBox.value?.focus()
+          e.preventDefault()
+        }
+      }
     })
+
+    onUnmounted(() => document.onkeydown = null)
 
     const timeLines: Record<string, gsap.core.Timeline> = {}
 
@@ -179,7 +179,7 @@ export default defineComponent({
       })
     }
 
-    const notification = ref({ title: '', show: false, description: '' });
+    const notification = ref({ title: '', show: false, description: '' })
     let stopDelete = false
 
     const deleteWithDelay = (id: string) => {
@@ -201,7 +201,7 @@ export default defineComponent({
       notification.value.show = false
     }
 
-    return { store, isIncome, onLongPress, resetLongPress, notification, deleteWithDelay, undoDelete }
+    return { store, isIncome, onLongPress, resetLongPress, notification, deleteWithDelay, undoDelete, searchBox }
   },
   data() {
     return {
@@ -211,35 +211,8 @@ export default defineComponent({
   },
   methods: {
     ...mapState(useTransactionStore, ['loading']),
-    avgRating(dishes: Dishes) {
-      return Math.floor(dishes.reduce((acc, d) => acc + d.rating, 0) / dishes.length)
-    },
-    toggleSearchBox() {
-      this.showSearch = !this.showSearch
-      if (!this.showSearch) this.q = ''
-      if (this.showSearch) {
-        const searchBox = this.$refs.searchBox as HTMLInputElement
-        setTimeout(() => searchBox.focus(), 50)
-      }
-    },
     transactions() {
       return this.store.transactionsGroupedByMonth
-    },
-    month(dateString: string) {
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ]
-      return monthNames[new Date(dateString).getMonth()].slice(0, 3).toUpperCase()
-    },
-    day(dateString: string) {
-      return new Date(dateString).getDate()
-    },
-    monthYear(monthYearString: string) {
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ]
-      const [month, year] = monthYearString.split(' ')
-      return (monthNames[Number(month) - 1] + ' ' + year).toUpperCase()
     },
     deleteTransaction(id: string) {
       const tl = gsap.timeline({})
@@ -258,7 +231,7 @@ export default defineComponent({
     },
     navigateToNewTransactionPage() {
       router.push({ name: 'Create Transaction' })
-    },
+    }
   },
   watch: {
     q(value) {
