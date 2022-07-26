@@ -28,7 +28,7 @@
     </transition>
 </template>
 
-<script>
+<script lang='ts'>
 import { defineComponent } from 'vue'
 import { CheckCircleIcon } from '@heroicons/vue/outline'
 import { XIcon } from '@heroicons/vue/solid'

@@ -29,7 +29,7 @@
     </transition>
 </template>
 
-<script>
+<script lang='ts'>
 import { XIcon } from '@heroicons/vue/solid'
 
 export default {

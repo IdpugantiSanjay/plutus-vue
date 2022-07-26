@@ -10,7 +10,7 @@
           <div>
             <label for='username' class='block text-sm font-medium text-gray-700'> Username </label>
             <div class='mt-1'>
-              <input v-model='username' id='username' name='username' type='text' autocomplete='username' required=''
+              <input v-model='username' id='username' name='username' type='text' autocomplete='username' required
                      class='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm' />
             </div>
           </div>
@@ -19,7 +19,7 @@
             <label for='password' class='block text-sm font-medium text-gray-700'> Password </label>
             <div class='mt-1'>
               <input v-model='password' id='password' name='password' type='password' autocomplete='current-password'
-                     required=''
+                     required
                      class='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm' />
             </div>
           </div>

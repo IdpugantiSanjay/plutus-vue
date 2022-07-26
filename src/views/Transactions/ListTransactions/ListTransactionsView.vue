@@ -27,7 +27,7 @@
     <Transition name='fade'>
       <div class='mt-4 w-3/4 m-auto flex' v-show='showSearch'>
         <div class='relative flex-1'>
-          <input v-model='q' id='q' name='q' type='text' required=''
+          <input v-model='q' id='q' name='q' type='text' required
                  class='appearance-none block w-full pl-10 shadow-sm placeholder-gray-400 text-sm'
                  ref='searchBox' placeholder='Search...' />
           <svg @click='$refs.searchBox.focus()' class='h-6 w-6 absolute left-2 top-1.5 opacity-40'
@@ -77,7 +77,7 @@
                   </div>
                 </div>
                 <div class='flex flex-col flex-1 min-w-0'>
-                  <div class='truncate' :class='{ "flex truncate items-center gap-2": trx.category }'>
+                  <div class='truncate' :class='{ "flex truncate items-center gap-2": trx.category === "Food Delivery"   }'>
                     <span>{{ trx.title }}</span>
                     <span v-if='trx.category === "Food Delivery"'>
                       <rating :model-value='trx.foodOrder.rating' :star-size='20' :read-only='true'></rating>
@@ -121,6 +121,7 @@ import { mapState } from 'pinia'
 import Rating from '@/components/TheRating.vue'
 import TheSimpleNotification from '@/components/TheSimpleNotification.vue'
 import TheActionNotification from '@/components/TheActionNotification.vue'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ListTransactionsView',
@@ -128,6 +129,7 @@ export default defineComponent({
   directives: { vOnLongPress },
   setup() {
     const store = useTransactionStore()
+    const router = useRouter()
 
     const searchBox = ref<HTMLInputElement | null>(null);
 
@@ -138,8 +140,13 @@ export default defineComponent({
         if (e.ctrlKey && e.key === 'f') {
           searchBox.value?.focus()
           e.preventDefault()
+        } else if (e.altKey &&  e.key === 'n') {
+          e.preventDefault()
+          router.push({ name: 'Create Transaction' })
         }
       }
+
+
     })
 
     onUnmounted(() => document.onkeydown = null)

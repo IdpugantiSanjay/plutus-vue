@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 
 export const Categories = {
-  Income: ['Salary', 'Rent', 'Transfer In'],
+  Income: ['Salary', 'Rent', 'Transfer In', 'Internet Reimbursement', 'Mutual Fund Redemption', 'Stock Dividend'],
   Entertainment: ['Movies'],
   Education: ['Books'],
   'Health & Fitness': ['Doctor', 'Pharmacy', 'Gym', 'Health Insurance'],
@@ -14,14 +14,6 @@ export const Categories = {
   'Bills & Utilities': ['Mobile Phone', 'Internet', 'Electricity'],
   Subscriptions: ['Amazon', 'Spotify', 'Aha', 'Zee5', 'Disney+']
 } as const
-
-// const MainCategories = Object.keys(Categories) as Array<keyof typeof Categories>
-//
-// const ExpenseCategories = (function (categories) {
-//   const { Income, ...rest } = categories
-//   return rest
-// })(Categories)
-
 
 export const useCategoryStore = defineStore('category', {
   state: () => ({ categories: Object.keys(Categories) as Array<keyof typeof Categories> }),

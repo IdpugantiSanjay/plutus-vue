@@ -20,7 +20,7 @@
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 import { PlusIcon } from '@heroicons/vue/solid'
 
 export default {

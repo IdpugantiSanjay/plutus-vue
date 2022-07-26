@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     login(params: LoginParams) {
       const storage = useLocalStorage('user-auth', {})
-      return axios.post(`https://localhost:7020/api/users/${params.username}:authenticate`, { ...params })
+      return axios.post(`/users/${params.username}:authenticate`, { ...params })
         .then((response: AxiosResponse<LoginResult>) => {
           if (!!response.data.bearerToken) {
             this.isLoggedIn = true

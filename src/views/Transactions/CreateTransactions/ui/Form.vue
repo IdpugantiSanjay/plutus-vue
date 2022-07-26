@@ -38,7 +38,7 @@
 
                 <ComboboxInput
                   class='w-full border-gray-300 py-2 pl-3 pr-10 text-sm leading-[22px]'
-                  :displayValue='(fund) => fund'
+                  :displayValue='fundDisplaySelector'
                   @change='query = $event.target.value'
                 />
 
@@ -150,6 +150,7 @@
                         required
                         min='0'
                         v-model='restaurant'
+                        autocomplete='restaurant'
                         autofocus />
                     </div>
                   </div>
@@ -257,13 +258,16 @@ export default defineComponent({
         })
     })
 
+    const fundDisplaySelector = (fund: unknown) => fund as string;
+
     return {
       categories: categoryStore.categories,
       subCategories: categoryStore.subCategories,
       filteredFunds,
       query,
       selectedPerson,
-      funds: funds
+      funds: funds,
+      fundDisplaySelector
     }
   },
   data(): { form: TransactionForm } {
